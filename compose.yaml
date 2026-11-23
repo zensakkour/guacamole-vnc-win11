@@ -1,0 +1,38 @@
+# Apache Guacamole 1.6.0 + guacd + PostgreSQL on a Windows 11 Home host.
+# Start with GUAC_BIND_IP=127.0.0.1 in .env (localhost only).
+# A LAN-only test can use GUAC_BIND_IP=0.0.0.0, subject to firewall policy.
+services:
+  guacd:
+    image: guacamole/guacd:1.6.0
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: ${GUAC_LOG_LEVEL:-info}
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: guacamole_db
+      POSTGRES_USER: guacamole_user
+      POSTGRES_PASSWORD: ${GUAC_DB_PASSWORD:?Set GUAC_DB_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  guacamole:
+    image: guacamole/guacamole:1.6.0
+    restart: unless-stopped
+    depends_on:
+      - db
+      - guacd
+    environment:
+      GUACD_HOSTNAME: guacd
+      POSTGRESQL_ENABLED: "true"
+      POSTGRESQL_HOSTNAME: db
+      POSTGRESQL_DATABASE: guacamole_db
+      POSTGRESQL_USERNAME: guacamole_user
+      POSTGRESQL_PASSWORD: ${GUAC_DB_PASSWORD:?Set GUAC_DB_PASSWORD in .env}
+    ports:
+      - "${GUAC_BIND_IP:-127.0.0.1}:8080:8080"
+
+volumes:
+  postgres_data:
