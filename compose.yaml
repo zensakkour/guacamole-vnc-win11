@@ -4,13 +4,13 @@
 services:
   guacd:
     image: guacamole/guacd:1.6.0
-    restart: unless-stopped
+    restart: "no"
     environment:
       LOG_LEVEL: ${GUAC_LOG_LEVEL:-info}
 
   db:
     image: postgres:16
-    restart: unless-stopped
+    restart: "no"
     environment:
       POSTGRES_DB: guacamole_db
       POSTGRES_USER: guacamole_user
@@ -20,7 +20,7 @@ services:
 
   guacamole:
     image: guacamole/guacamole:1.6.0
-    restart: unless-stopped
+    restart: "no"
     depends_on:
       - db
       - guacd
